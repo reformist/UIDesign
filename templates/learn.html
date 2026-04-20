@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+
+    <!-- Progress bar -->
+    <div class="mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-secondary small text-uppercase" style="letter-spacing: 0.08em;">Lesson {{ lesson_id }} of 2</span>
+        <span class="text-warning small fw-bold">{{ lesson.title }}</span>
+      </div>
+      <div class="progress" style="height: 4px; background: rgba(255,255,255,0.1);">
+        <div class="progress-bar bg-warning" style="width: {{ (lesson_id / 2 * 100) | int }}%;"></div>
+      </div>
+    </div>
+
+    <!-- Lesson header -->
+    <div class="mb-5">
+      <h1 class="display-5 fw-bold mb-2">{{ lesson.title }}</h1>
+      <p class="text-warning fs-5 mb-3">{{ lesson.subtitle }}</p>
+      <p class="text-secondary">{{ lesson.content.intro }}</p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- LESSON 1: Table Positions                                     -->
+    <!-- ============================================================ -->
+    {% if lesson.type == 'positions' %}
+
+    <div class="text-center mb-3">
+      <span class="text-secondary small text-uppercase" style="letter-spacing: 0.08em;">Click a seat to learn about it</span>
+    </div>
+
+    <!-- Poker table diagram -->
+    <div class="position-relative mx-auto mb-4" style="max-width: 480px;">
+      <!-- Felt oval -->
+      <div class="mx-auto position-relative"
+           style="width: 100%; padding-top: 54%;
+                  background: #1a4a2e;
+                  border-radius: 50%;
+                  border: 6px solid #8B5E3C;
+                  box-shadow: 0 0 0 3px #5a3a1a, inset 0 0 40px rgba(0,0,0,0.4);">
+        <div class="position-absolute top-50 start-50 translate-middle text-center">
+          <span class="text-white opacity-25" style="font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase;">Dealer</span>
+        </div>
+      </div>
+
+      <!-- Position buttons placed around the oval -->
+      {% for pos in lesson.content.positions %}
+      <button class="pos-btn btn btn-sm fw-bold position-absolute"
+              data-pos-id="{{ pos.id }}"
+              style="transform: translate(-50%, -50%);
+                {% if pos.id == 'btn' %}top: 14%; left: 76%;
+                {% elif pos.id == 'co'  %}top: 42%; left: 94%;
+                {% elif pos.id == 'mp'  %}top: 76%; left: 78%;
+                {% elif pos.id == 'utg' %}top: 86%; left: 50%;
+                {% elif pos.id == 'bb'  %}top: 76%; left: 22%;
+                {% elif pos.id == 'sb'  %}top: 42%; left: 6%;
+                {% endif %}">
+        {{ pos.short }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <!-- Position detail area -->
+    <div id="pos-prompt" class="text-center py-4 text-secondary mb-3">
+      <div style="font-size: 1.6rem;">&#9673;</div>
+      <p class="mt-2 mb-0 small">Select a seat above to see details</p>
+    </div>
+
+    {% for pos in lesson.content.positions %}
+    <div class="position-detail-card mb-3 p-4 rounded-3"
+         id="pos-card-{{ pos.id }}"
+         style="display: none;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid {% if pos.color == 'success' %}rgba(25,135,84,0.5){% elif pos.color == 'warning' %}rgba(255,193,7,0.5){% else %}rgba(220,53,69,0.5){% endif %};">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <span class="badge me-2 {% if pos.color == 'success' %}bg-success{% elif pos.color == 'warning' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+            {{ pos.category | upper }}
+          </span>
+          <span class="fw-bold fs-4">{{ pos.name }}</span>
+          <span class="text-secondary ms-2">({{ pos.short }})</span>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary py-0" onclick="closePositionCard('{{ pos.id }}')">✕</button>
+      </div>
+      <p class="mb-2">{{ pos.description }}</p>
+      <p class="text-secondary mb-3">{{ pos.preflop_advice }}</p>
+      <div class="p-3 rounded-2" style="background: rgba(255,255,255,0.06);">
+        <span class="text-warning small fw-bold d-block mb-1">Playable Hands</span>
+        <span class="text-light small">{{ pos.playable_hands }}</span>
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="alert mt-3" style="background: rgba(255,193,7,0.08); border: 1px solid rgba(255,193,7,0.25); border-radius: 10px;">
+      <span class="text-warning fw-bold">Core Rule: </span>
+      <span class="text-light">{{ lesson.content.core_rule }}</span>
+    </div>
+
+    {% endif %}
+
+    <!-- ============================================================ -->
+    <!-- LESSON 2: Preflop Hand Strength Tiers                        -->
+    <!-- ============================================================ -->
+    {% if lesson.type == 'strength' %}
+
+    <!-- Hand tier cards -->
+    {% for tier in lesson.content.tiers %}
+    <div class="tier-card mb-3 rounded-3 overflow-hidden"
+         style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);">
+
+      <!-- Tier header — always visible, clickable -->
+      <div class="tier-header d-flex align-items-center justify-content-between p-3"
+           style="cursor: pointer;"
+           onclick="toggleTier('{{ tier.id }}')">
+        <div class="d-flex align-items-center gap-3">
+          <span class="badge fs-6 px-3 py-2
+            {% if tier.color == 'warning' %}bg-warning text-dark
+            {% elif tier.color == 'success' %}bg-success
+            {% elif tier.color == 'info' %}bg-info text-dark
+            {% elif tier.color == 'danger' %}bg-danger
+            {% else %}bg-secondary{% endif %}">
+            {{ tier.label }}
+          </span>
+          <div class="d-flex flex-wrap gap-1">
+            {% for hand in tier.hands %}
+            <span class="hand-tag">{{ hand }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <span class="text-secondary tier-chevron" id="chev-{{ tier.id }}" style="font-size: 1rem;">&#x25BE;</span>
+      </div>
+
+      <!-- Tier detail — hidden by default -->
+      <div class="tier-detail border-top border-secondary border-opacity-25 p-3 pt-3"
+           id="tier-{{ tier.id }}"
+           style="display: none;">
+        <p class="mb-2">{{ tier.description }}</p>
+        <div class="d-flex flex-wrap gap-3 mb-3">
+          <div class="p-2 px-3 rounded-2 small" style="background: rgba(255,255,255,0.06);">
+            <span class="text-secondary">Action: </span>
+            <span class="text-warning fw-bold">{{ tier.action }}</span>
+          </div>
+        </div>
+        <div class="p-3 rounded-2" style="background: rgba(255,193,7,0.06); border-left: 3px solid rgba(255,193,7,0.4);">
+          <span class="text-warning small fw-bold">Tip: </span>
+          <span class="text-light small">{{ tier.tip }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Key factors -->
+    <div class="mt-4 mb-2">
+      <p class="text-secondary small text-uppercase mb-3" style="letter-spacing: 0.08em;">Three factors that affect hand value</p>
+      <div class="row g-3">
+        {% for factor in lesson.content.key_factors %}
+        <div class="col-md-4">
+          <div class="p-3 rounded-3 h-100" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="fw-bold rounded-2 text-center text-dark bg-warning"
+                    style="width: 28px; height: 28px; line-height: 28px; font-size: 0.8rem; flex-shrink: 0;">
+                {{ factor.icon }}
+              </span>
+              <span class="fw-bold">{{ factor.label }}</span>
+            </div>
+            <p class="text-secondary small mb-0">{{ factor.detail }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% endif %}
+
+    <!-- Key takeaway -->
+    <div class="mt-5 p-4 rounded-3" style="background: rgba(255,193,7,0.07); border-left: 4px solid #ffc107;">
+      <p class="text-warning fw-bold mb-1 small text-uppercase" style="letter-spacing: 1px;">Key Takeaway</p>
+      <p class="mb-0">{{ lesson.key_takeaway }}</p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between align-items-center mt-5 mb-5">
+      {% if lesson_id > 1 %}
+      <a href="{{ url_for('learn', lesson_id=lesson_id - 1) }}" class="btn btn-outline-secondary px-4">
+        &#8592; Previous
+      </a>
+      {% else %}
+      <div></div>
+      {% endif %}
+
+      <button id="next-btn" class="btn btn-success btn-lg px-5 fw-bold" onclick="advanceLesson({{ lesson_id }})">
+        {% if lesson.next_lesson %}Continue &#8594;{% else %}Take the Quiz &#8594;{% endif %}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const lessonId = {{ lesson_id }};
+
+// Record page visit
+$.post("/record_lesson", { lesson_id: lessonId, action: "visit" });
+
+/* ── Positions (Lesson 1) ───────────────────────────────────── */
+$('.pos-btn').on('click', function() {
+  const posId = $(this).data('pos-id');
+  $('.position-detail-card').hide();
+  $('#pos-prompt').hide();
+  $('#pos-card-' + posId).fadeIn(150);
+  $('.pos-btn').removeClass('active-pos');
+  $(this).addClass('active-pos');
+  $.post("/record_lesson", { lesson_id: lessonId, action: "view_position", detail: posId });
+});
+
+function closePositionCard(posId) {
+  $('#pos-card-' + posId).hide();
+  $('#pos-prompt').show();
+  $('.pos-btn').removeClass('active-pos');
+}
+
+/* ── Hand Tiers (Lesson 2) ──────────────────────────────────── */
+function toggleTier(tierId) {
+  const detail = $('#tier-' + tierId);
+  const chev   = $('#chev-' + tierId);
+  const isOpen = detail.is(':visible');
+  detail.slideToggle(150);
+  chev.html(isOpen ? '&#x25BE;' : '&#x25B4;');
+  if (!isOpen) {
+    $.post("/record_lesson", { lesson_id: lessonId, action: "view_tier", detail: tierId });
+  }
+}
+
+/* ── Advance ────────────────────────────────────────────────── */
+function advanceLesson(id) {
+  $.post("/record_lesson", { lesson_id: id, action: "complete" }, function() {
+    {% if lesson.next_lesson %}
+    window.location.href = "{{ url_for('learn', lesson_id=lesson.next_lesson) }}";
+    {% else %}
+    window.location.href = "{{ url_for('quiz', question_id=1) }}";
+    {% endif %}
+  });
+}
+</script>
+
+{% endblock %}

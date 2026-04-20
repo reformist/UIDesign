@@ -1,0 +1,53 @@
+/* ── Position buttons (around the table) ───────────────────── */
+.pos-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
+    min-width: 2.6rem;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  
+  .pos-btn:hover {
+    background: rgba(255, 193, 7, 0.2);
+    border-color: #ffc107;
+    color: #ffc107;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  
+  .pos-btn.active-pos {
+    background: rgba(25, 135, 84, 0.3);
+    border-color: #198754;
+    color: #75d69c;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  
+  /* ── Hand tags (inside tier rows) ──────────────────────────── */
+  .hand-tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-family: monospace;
+    color: #e0e0e0;
+    white-space: nowrap;
+  }
+  
+  /* ── Tier card hover ────────────────────────────────────────── */
+  .tier-header:hover {
+    background: rgba(255,255,255,0.04);
+  }
+  
+  /* ── Responsive table diagram ───────────────────────────────── */
+  @media (max-width: 576px) {
+    .pos-btn {
+      font-size: 0.6rem;
+      padding: 0.2rem 0.35rem;
+      min-width: 2rem;
+    }
+  }
