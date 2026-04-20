@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-8 text-center">
+        <h1 class="display-3 fw-bold mb-4">Poker Preflop Hand Strength</h1>
+        
+        <h3 class="text-warning mb-4">Same hand. Different position. Completely different decisions.</h3>
+        
+        <p class="lead mb-5">
+            Learn when where you sit at the table changes whether you play a hand and how.
+        </p>
+
+        <a href="{{ url_for('learn', lesson_id=1) }}" class="btn btn-success btn-lg px-5 py-3 fs-4 fw-bold shadow">
+            Start Learning
+        </a>
+    </div>
+</div>
+{% endblock %}
