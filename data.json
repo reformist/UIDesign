@@ -1,24 +1,183 @@
 {
   "lessons": {
+    "2": {
+      "title": "Table Position: Where You Sit Changes Everything",
+      "subtitle": "Position is the most underrated concept in poker. It determines how much information you have before you act.",
+      "type": "positions",
+      "content": {
+        "intro": "In Texas Hold'em, players act in a fixed order every street. Acting later means you've seen what everyone else does first — that information is enormously powerful preflop.",
+        "positions": [
+          {
+            "id": "sb",
+            "name": "Small Blind",
+            "short": "SB",
+            "category": "early",
+            "description": "You post half the big blind and act first on every postflop street. You have the worst position at the table.",
+            "preflop_advice": "Play tight. You're forced to put money in, but you'll be out of position all hand long.",
+            "playable_hands": "Premium hands only: AA, KK, QQ, JJ, AK",
+            "color": "danger"
+          },
+          {
+            "id": "bb",
+            "name": "Big Blind",
+            "short": "BB",
+            "category": "early",
+            "description": "You post the full blind and act last preflop. You get a discount to continue — but you'll be out of position postflop.",
+            "preflop_advice": "Defend wider than SB since you're already invested, but don't go overboard.",
+            "playable_hands": "Wider defense range: any pair, suited connectors, A-x suited",
+            "color": "warning"
+          },
+          {
+            "id": "utg",
+            "name": "Under the Gun",
+            "short": "UTG",
+            "category": "early",
+            "description": "First to act preflop. You have zero information about what anyone else will do.",
+            "preflop_advice": "Play the tightest range from here. Your hand needs to be strong enough to handle raises from anyone behind you.",
+            "playable_hands": "AA, KK, QQ, JJ, TT, AK, AQs",
+            "color": "danger"
+          },
+          {
+            "id": "mp",
+            "name": "Middle Position",
+            "short": "MP",
+            "category": "middle",
+            "description": "A few players have acted, a few are still left to act. Moderate information, moderate position.",
+            "preflop_advice": "You can open slightly wider than UTG, but still stick to solid hands.",
+            "playable_hands": "Add: 99, 88, AJ, KQ, suited connectors like JTs",
+            "color": "warning"
+          },
+          {
+            "id": "co",
+            "name": "Cutoff",
+            "short": "CO",
+            "category": "late",
+            "description": "One seat before the button. You have good position — only the button acts after you.",
+            "preflop_advice": "Open fairly wide here. You'll have position against the blinds if they call.",
+            "playable_hands": "Add: 77, 66, A-x suited, KJ, QJ, broadways",
+            "color": "success"
+          },
+          {
+            "id": "btn",
+            "name": "Button",
+            "short": "BTN",
+            "category": "late",
+            "description": "The best seat at the table. You act last on every postflop street — a massive advantage.",
+            "preflop_advice": "Open the widest range from here. You can profitably play many more hands when you always act last.",
+            "playable_hands": "Expand to: 55, 44, any suited ace, Kx suited, weak broadways, suited connectors down to 65s",
+            "color": "success"
+          }
+        ],
+        "core_rule": "The later you act, the more hands you can profitably play."
+      },
+      "key_takeaway": "Early position = tight ranges. Late position = wide ranges. The button is the most profitable seat — use it.",
+      "next_lesson": null
+    },
     "1": {
-      "title": "Meet the seats",
-      "content": "UTG: Under the Gun — acts first, blind to everyone...",
-      "image": "path_to_table_image.png",
+      "title": "Preflop Hand Strength",
+      "subtitle": "Not all starting hands are created equal. Learn which hands are strong, which are speculative, and which to fold.",
+      "type": "strength",
+      "content": {
+        "intro": "Your two hole cards determine your preflop options. Hand strength isn't just about the absolute value of your cards — it's about how they interact with position, stack size, and the action in front of you.",
+        "tiers": [
+          {
+            "id": "premium",
+            "label": "Premium",
+            "color": "warning",
+            "hands": ["AA", "KK", "QQ", "JJ", "AKs"],
+            "description": "The best starting hands in poker. Raise or re-raise from any position. These hands play well in big pots.",
+            "action": "Raise / 3-bet from anywhere",
+            "tip": "With AA and KK, you want to build the pot preflop. Don't slowplay — raise big."
+          },
+          {
+            "id": "strong",
+            "label": "Strong",
+            "color": "success",
+            "hands": ["TT", "99", "AKo", "AQs", "AJs", "KQs"],
+            "description": "Very strong hands that play well from most positions. Open-raise from middle position onwards, and 3-bet vs. loose openers.",
+            "action": "Raise from MP+, call or 3-bet vs. opens",
+            "tip": "TT and 99 are strong but vulnerable to overcards on the flop. Position matters a lot with these."
+          },
+          {
+            "id": "playable",
+            "label": "Playable",
+            "color": "info",
+            "hands": ["88", "77", "ATs", "AQo", "KJs", "QJs", "JTs"],
+            "description": "Solid hands in position. From the cutoff or button, these are opens. From early position, proceed with caution.",
+            "action": "Open from CO/BTN, consider from MP",
+            "tip": "Suited hands like ATs and JTs gain value from flush draw potential — they play better than their off-suit equivalents."
+          },
+          {
+            "id": "speculative",
+            "label": "Speculative",
+            "color": "secondary",
+            "hands": ["66–22", "A9s–A2s", "KTs", "QTs", "T9s", "98s", "87s", "76s"],
+            "description": "These hands need the right conditions: late position, good pot odds, or a cheap flop. Don't over-invest preflop.",
+            "action": "Open from BTN only, call in position with good odds",
+            "tip": "Small pairs are set-mining hands — you're hoping to flop three-of-a-kind. It won't happen often, so you need a good price to see the flop."
+          },
+          {
+            "id": "fold",
+            "label": "Fold (mostly)",
+            "color": "danger",
+            "hands": ["Off-suit low connectors", "Weak K-x / Q-x off-suit", "Random junk (72o, 83o…)"],
+            "description": "The majority of hands you're dealt. Folding is profitable. Don't fall in love with cards just because they're yours.",
+            "action": "Fold from most positions",
+            "tip": "Beginners play too many hands. The best preflop decision is often folding and waiting for a better spot."
+          }
+        ],
+        "key_factors": [
+          {
+            "icon": "S",
+            "label": "Suitedness",
+            "detail": "Suited hands (same suit) are worth more — they can make flushes. AKs is stronger than AKo."
+          },
+          {
+            "icon": "C",
+            "label": "Connectivity",
+            "detail": "Connected cards (like JT, 98) can make straights, adding hidden value on the right boards."
+          },
+          {
+            "icon": "P",
+            "label": "Position",
+            "detail": "A hand that's a fold UTG can be a profitable open from the button. Always adjust for where you're sitting."
+          }
+        ]
+      },
+      "key_takeaway": "Premium hands play themselves. With everything else, your position at the table determines whether the hand is worth playing at all.",
       "next_lesson": 2
     }
   },
   "quiz": {
     "1": {
-      "hand": "A-A",
-      "situation": "You're UTG (first to act). What do you do with pocket Aces?",
-      "options": [
-        "Raise 3-4x the big blind",
-        "Limp (call the BB) to trap",
-        "Fold - too early to get involved"
-      ],
-      "correct_index": 0,
-      "explanation": "Pocket Aces are always a raise even from UTG...",
-      "next_question": 2
+      "question": "You're Under the Gun (UTG). Which hand should you fold?",
+      "options": ["AA", "KK", "87 suited", "AK"],
+      "answer": 2,
+      "explanation": "87 suited is a speculative hand that needs position and good odds to be profitable. From UTG — the tightest position — it's a clear fold."
+    },
+    "2": {
+      "question": "You're on the Button. Compared to UTG, you should play...",
+      "options": ["Tighter — more players can act behind you", "The same range — position doesn't matter preflop", "Wider — you'll act last postflop and have more info", "Wider — but only if you have a pair"],
+      "answer": 2,
+      "explanation": "The Button acts last on every postflop street, which is a huge informational advantage. You can profitably play far more hands from here."
+    },
+    "3": {
+      "question": "Why are suited hands (e.g. AKs) better than off-suit hands (e.g. AKo)?",
+      "options": ["They're easier to remember", "They can make flushes, adding extra ways to win", "Suits don't actually matter preflop", "They always make a pair on the flop"],
+      "answer": 1,
+      "explanation": "Suited hands gain value from the possibility of making a flush. AKs has roughly 3-4% more equity than AKo because of this."
+    },
+    "4": {
+      "question": "Which position acts FIRST preflop?",
+      "options": ["Button", "Big Blind", "Small Blind", "Under the Gun"],
+      "answer": 3,
+      "explanation": "Under the Gun (UTG) is first to act preflop because the blinds have already posted. This forces UTG to play with no information — hence the tight range."
+    },
+    "5": {
+      "question": "You have 55 (a small pair). Which is the best situation to play it?",
+      "options": ["UTG, raise big to win the blinds", "Button, call a small open to try to flop a set", "Big Blind, 3-bet all-in against a UTG raise", "Fold it — small pairs are never worth playing"],
+      "answer": 1,
+      "explanation": "Small pairs are set-mining hands. You want to see a cheap flop in position hoping to flop three-of-a-kind. Calling a small open from the button is the ideal spot."
     }
   }
 }
