@@ -1,0 +1,24 @@
+{
+  "lessons": {
+    "1": {
+      "title": "Meet the seats",
+      "content": "UTG: Under the Gun — acts first, blind to everyone...",
+      "image": "path_to_table_image.png",
+      "next_lesson": 2
+    }
+  },
+  "quiz": {
+    "1": {
+      "hand": "A-A",
+      "situation": "You're UTG (first to act). What do you do with pocket Aces?",
+      "options": [
+        "Raise 3-4x the big blind",
+        "Limp (call the BB) to trap",
+        "Fold - too early to get involved"
+      ],
+      "correct_index": 0,
+      "explanation": "Pocket Aces are always a raise even from UTG...",
+      "next_question": 2
+    }
+  }
+}
