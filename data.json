@@ -178,6 +178,66 @@
       "options": ["UTG, raise big to win the blinds", "Button, call a small open to try to flop a set", "Big Blind, 3-bet all-in against a UTG raise", "Fold it — small pairs are never worth playing"],
       "answer": 1,
       "explanation": "Small pairs are set-mining hands. You want to see a cheap flop in position hoping to flop three-of-a-kind. Calling a small open from the button is the ideal spot."
+    },
+    "6": {
+      "question": "You're UTG (first to act). You hold A\u2660 A\u2665 \u2014 pocket Aces. What do you do?",
+      "options": [
+        "Raise 3-4x the big blind",
+        "Limp and trap",
+        "Fold \u2014 UTG is too early"
+      ],
+      "answer": 0,
+      "explanation": "Pocket Aces are always a raise. Limping lets players enter cheaply and outflop you. Raise to build the pot and narrow the field."
+    },
+    "7": {
+      "question": "You're UTG. You hold J\u2663 T\u2663 \u2014 a suited connector. What's your play?",
+      "options": [
+        "Raise \u2014 it is a strong hand",
+        "Fold \u2014 suited connectors need position",
+        "Call if someone else raised"
+      ],
+      "answer": 1,
+      "explanation": "JTs is a speculative hand that needs position and good odds to be profitable. From UTG \u2014 the tightest position \u2014 fold."
+    },
+    "8": {
+      "question": "You're on the Button. It folds to you holding J\u2665 T\u2665. The blinds are tight. What do you do?",
+      "options": [
+        "Raise \u2014 steal the blinds and play in position",
+        "Fold \u2014 not a premium hand",
+        "Limp and see what the blinds do"
+      ],
+      "answer": 0,
+      "explanation": "From the BTN, JTs is an easy raise. You will always act last postflop. The same hand is a fold from UTG but a raise from BTN."
+    },
+    "9": {
+      "question": "You're in the Cutoff with K\u2666 5\u2663. UTG and MP fold. BTN + blinds remain. What do you do?",
+      "options": [
+        "Raise \u2014 you have a king!",
+        "Fold \u2014 weak kicker, vulnerable hand",
+        "Call if someone already raised"
+      ],
+      "answer": 1,
+      "explanation": "K5o is a trap hand. The king looks good but the 5 kicker is a liability. If you flop a king you often lose to K-Q, K-J, or K-T."
+    },
+    "10": {
+      "question": "BTN raises to 3x. You're in the SB with 7\u2665 7\u2660. BB is tight. What do you do?",
+      "options": [
+        "3-bet to 9x \u2014 put pressure on BTN",
+        "Call and see the flop",
+        "Fold \u2014 small pair out of position"
+      ],
+      "answer": 1,
+      "explanation": "77 from SB: calling to try to flop a set is standard. 3-betting risks getting 4-bet off your equity; folding is too tight."
+    },
+    "11": {
+      "question": "UTG raises to 3x. Everyone folds. You're in the BB with A\u2666 Q\u2663. What do you do?",
+      "options": [
+        "3-bet to 9x \u2014 great hand!",
+        "Call \u2014 close the action and see a flop",
+        "Fold \u2014 UTG range is too strong"
+      ],
+      "answer": 1,
+      "explanation": "AQo is strong, but UTG range includes AA, KK, QQ, AK \u2014 hands that dominate you. Call, do not 3-bet, and play carefully."
     }
   }
 }

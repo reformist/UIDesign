@@ -4,7 +4,7 @@ import json
 
 app = Flask(__name__)
 
-with open('data.json', 'r') as file:
+with open('data.json', 'r', encoding='utf-8') as file:
     poker_data = json.load(file)
 
 # We assume 1 user
@@ -45,16 +45,37 @@ def record_lesson():
     user_state["learning_selections"].append(entry)
     return jsonify({"status": "ok"})
 
+@app.route('/submit_answer', methods=['POST'])
+def submit_answer():
+    """Records the user's answer for a quiz question."""
+    question_id = request.form.get("question_id")
+    selected    = int(request.form.get("answer"))
+    question    = poker_data['quiz'].get(str(question_id))
+
+    if question:
+        correct = question['answer']
+        user_state["quiz_answers"][question_id] = {
+            "question":      question['question'],
+            "selected":      selected,
+            "selected_text": question['options'][selected],
+            "correct":       selected == correct,
+            "correct_text":  question['options'][correct],
+            "explanation":   question['explanation']
+        }
+
+    return jsonify({"status": "ok"})
+
 @app.route('/quiz/<int:question_id>')
 def quiz(question_id):
     question_info = poker_data['quiz'].get(str(question_id))
     if not question_info:
         return redirect(url_for('result'))
-    return render_template('quiz.html', question=question_info, question_id=question_id)
+    total = len(poker_data['quiz'])
+    return render_template('quiz.html', question=question_info, question_id=question_id, total=total)
 
 @app.route('/quiz/result')
 def result():
-    score = 0
+    score = sum(1 for a in user_state['quiz_answers'].values() if a['correct'])
     return render_template('result.html', score=score, answers=user_state['quiz_answers'])
 
 if __name__ == '__main__':

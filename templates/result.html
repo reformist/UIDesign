@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-8 text-center">
+    <div class="mb-5 mt-3">
+      <p class="text-secondary small text-uppercase mb-3" style="letter-spacing: 0.08em;">Quiz Complete</p>
+      <div class="display-1 fw-bold mb-2"
+           style="color: {% if score == answers|length %}#198754{% elif score >= 3 %}#ffc107{% else %}#dc3545{% endif %};">
+        {{ score }}<span class="fs-2 text-secondary">/{{ answers|length }}</span>
+      </div>
+      <p class="fs-5 text-secondary">
+        {% if score == answers|length %}Perfect score — you know your preflop ranges!
+        {% elif score >= 3 %}Solid effort — review the lessons to sharpen up.
+        {% else %}Keep practicing — position takes time to master.
+        {% endif %}
+      </p>
+    </div>
+    <div class="text-start mb-5">
+      <p class="text-secondary small text-uppercase mb-3" style="letter-spacing: 0.08em;">Answer Review</p>
+      {% for qid, data in answers.items() %}
+      <div class="p-3 rounded-3 mb-3"
+           style="background: rgba(255,255,255,0.04);
+                  border: 1px solid {% if data.correct %}rgba(25,135,84,0.4){% else %}rgba(220,53,69,0.4){% endif %};">
+        <div class="d-flex align-items-start gap-3">
+          <span class="fw-bold mt-1" style="color: {% if data.correct %}#198754{% else %}#dc3545{% endif %}; font-size: 1.2rem;">
+            {% if data.correct %}✓{% else %}✗{% endif %}
+          </span>
+          <div>
+            <p class="fw-bold mb-1">Q{{ qid }}: {{ data.question }}</p>
+            <p class="small mb-1">
+              <span class="text-secondary">Your answer: </span>
+              <span style="color: {% if data.correct %}#75d69c{% else %}#f1aeb5{% endif %};">{{ data.selected_text }}</span>
+            </p>
+            {% if not data.correct %}
+            <p class="small mb-1">
+              <span class="text-secondary">Correct answer: </span>
+              <span class="text-success">{{ data.correct_text }}</span>
+            </p>
+            {% endif %}
+            <p class="small text-secondary mb-0">{{ data.explanation }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="d-flex justify-content-center gap-3 mb-5">
+      <a href="{{ url_for('home') }}" class="btn btn-outline-secondary px-4">&#8592; Home</a>
+      <a href="{{ url_for('quiz', question_id=1) }}" class="btn btn-warning px-5 fw-bold">Retake Quiz</a>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
