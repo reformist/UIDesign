@@ -34,7 +34,6 @@
 
     <!-- Poker table diagram -->
     <div class="position-relative mx-auto mb-4" style="max-width: 480px;">
-      <!-- Felt oval -->
       <div class="mx-auto position-relative"
            style="width: 100%; padding-top: 54%;
                   background: #1a4a2e;
@@ -46,7 +45,6 @@
         </div>
       </div>
 
-      <!-- Position buttons placed around the oval -->
       {% for pos in lesson.content.positions %}
       <button class="pos-btn btn btn-sm fw-bold position-absolute"
               data-pos-id="{{ pos.id }}"
@@ -63,7 +61,6 @@
       {% endfor %}
     </div>
 
-    <!-- Position detail area -->
     <div id="pos-prompt" class="text-center py-4 text-secondary mb-3">
       <div style="font-size: 1.6rem;">&#9673;</div>
       <p class="mt-2 mb-0 small">Select a seat above to see details</p>
@@ -83,13 +80,20 @@
           <span class="fw-bold fs-4">{{ pos.name }}</span>
           <span class="text-secondary ms-2">({{ pos.short }})</span>
         </div>
-        <button class="btn btn-sm btn-outline-secondary py-0" onclick="closePositionCard('{{ pos.id }}')">✕</button>
+        <button class="btn btn-sm btn-outline-secondary py-0" onclick="closePositionCard('{{ pos.id }}')">&#x2715;</button>
       </div>
       <p class="mb-2">{{ pos.description }}</p>
       <p class="text-secondary mb-3">{{ pos.preflop_advice }}</p>
-      <div class="p-3 rounded-2" style="background: rgba(255,255,255,0.06);">
-        <span class="text-warning small fw-bold d-block mb-1">Playable Hands</span>
-        <span class="text-light small">{{ pos.playable_hands }}</span>
+      <!-- Hand range grid for this position -->
+      <div class="mb-2">
+        <span class="text-warning small fw-bold d-block mb-2">Hand Range Grid</span>
+        <div class="mb-3 p-3 rounded-2" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); font-size: 0.82rem;">
+          <p class="text-light mb-2">This grid shows every possible starting hand. Each cell is colored <span style="color:#75d69c;">green</span> if it's in this position's playable range, or dark if it should be folded.</p>
+          <p class="text-secondary mb-0">The <strong class="text-light">diagonal</strong> shows pocket pairs (AA–22). The <strong class="text-light">top-right triangle</strong> shows suited hands (e.g. AKs). The <strong class="text-light">bottom-left triangle</strong> shows off-suit hands (e.g. AKo).</p>
+        </div>
+        <div id="pos-grid-{{ pos.id }}"
+             data-hands="{{ pos.playable_hands }}"
+             style="display: grid; grid-template-columns: repeat(13, 1fr); gap: 2px; max-width: 620px;"></div>
       </div>
     </div>
     {% endfor %}
@@ -102,65 +106,53 @@
     {% endif %}
 
     <!-- ============================================================ -->
-    <!-- LESSON TYPE: strength                                         -->
+    <!-- LESSON TYPE: strength — Hand Range Grid                       -->
     <!-- ============================================================ -->
     {% if lesson.type == 'strength' %}
 
-    <!-- Hand tier cards -->
-    <div class="d-flex justify-content-end mb-2">
+    <!-- Legend + counter -->
+    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="text-secondary small me-1">Tier:</span>
+        <span class="badge px-2 py-1" style="background:#b8860b;">Premium</span>
+        <span class="badge px-2 py-1 bg-success">Strong</span>
+        <span class="badge px-2 py-1 bg-info text-dark">Playable</span>
+        <span class="badge px-2 py-1 bg-secondary">Speculative</span>
+        <span class="badge px-2 py-1" style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); color:#666;">Fold</span>
+      </div>
       <span id="tier-counter" class="text-secondary small">0 / 5 tiers explored</span>
     </div>
 
-    {% for tier in lesson.content.tiers %}
-    <div class="tier-card mb-3 rounded-3 overflow-hidden"
-         style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);">
+    <p class="text-secondary small mb-3">
+      Suited hands (top-right) &middot; Pairs (diagonal) &middot; Off-suit (bottom-left) &middot; <strong class="text-light">Click any cell</strong> to learn more
+    </p>
 
-      <!-- Tier header — always visible, clickable -->
-      <div class="tier-header d-flex align-items-center justify-content-between p-3"
-           style="cursor: pointer;"
-           onclick="toggleTier('{{ tier.id }}')">
-        <div class="d-flex align-items-center gap-3">
-          <span class="badge fs-6 px-3 py-2
-            {% if tier.color == 'warning' %}bg-warning text-dark
-            {% elif tier.color == 'success' %}bg-success
-            {% elif tier.color == 'info' %}bg-info text-dark
-            {% elif tier.color == 'danger' %}bg-danger
-            {% else %}bg-secondary{% endif %}">
-            {{ tier.label }}
-          </span>
-          <div class="d-flex flex-wrap gap-1">
-            {% for hand in tier.hands %}
-            <span class="hand-tag">{{ hand }}</span>
-            {% endfor %}
-          </div>
+    <!-- 13x13 Grid -->
+    <div id="range-grid" style="display: grid; grid-template-columns: repeat(13, 1fr); gap: 2px; max-width: 700px;"></div>
+
+    <!-- Click detail panel -->
+    <div id="hand-detail" class="mt-4 p-4 rounded-3" style="display:none; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span id="detail-hand" class="fw-bold fs-4"></span>
+          <span id="detail-badge" class="badge fs-6 px-3 py-2"></span>
+          <span id="detail-check" style="display:none; color:#75d69c; font-size:0.85rem;">✓ explored</span>
         </div>
-        <div class="d-flex align-items-center gap-2">
-          <span class="tier-check" id="tiercheck-{{ tier.id }}" style="display:none; color:#75d69c; font-size:0.85rem;">✓</span>
-          <span class="text-secondary tier-chevron" id="chev-{{ tier.id }}" style="font-size: 1rem;">&#x25BE;</span>
-        </div>
+        <button class="btn btn-sm btn-outline-secondary py-0" onclick="closeDetail()">&#x2715;</button>
       </div>
-
-      <!-- Tier detail — hidden by default -->
-      <div class="tier-detail border-top border-secondary border-opacity-25 p-3 pt-3"
-           id="tier-{{ tier.id }}"
-           style="display: none;">
-        <p class="mb-2">{{ tier.description }}</p>
-        <div class="d-flex flex-wrap gap-3 mb-3">
-          <div class="p-2 px-3 rounded-2 small" style="background: rgba(255,255,255,0.06);">
-            <span class="text-secondary">Action: </span>
-            <span class="text-warning fw-bold">{{ tier.action }}</span>
-          </div>
-        </div>
-        <div class="p-3 rounded-2" style="background: rgba(255,193,7,0.06); border-left: 3px solid rgba(255,193,7,0.4);">
-          <span class="text-warning small fw-bold">Tip: </span>
-          <span class="text-light small">{{ tier.tip }}</span>
-        </div>
+      <p id="detail-desc" class="text-secondary mb-2"></p>
+      <div class="p-2 px-3 rounded-2 small d-inline-block mb-2" style="background: rgba(255,255,255,0.06);">
+        <span class="text-secondary">Action: </span>
+        <span id="detail-action" class="text-warning fw-bold"></span>
+      </div>
+      <div class="p-3 rounded-2 mt-2" style="background: rgba(255,193,7,0.06); border-left: 3px solid rgba(255,193,7,0.4);">
+        <span class="text-warning small fw-bold">Tip: </span>
+        <span id="detail-tip" class="text-light small"></span>
       </div>
     </div>
-    {% endfor %}
 
     <!-- Key factors -->
-    <div class="mt-4 mb-2">
+    <div class="mt-5 mb-2">
       <p class="text-secondary small text-uppercase mb-3" style="letter-spacing: 0.08em;">Three factors that affect hand value</p>
       <div class="row g-3">
         {% for factor in lesson.content.key_factors %}
@@ -215,10 +207,8 @@
 {% block scripts %}
 <script>
 const lessonId = {{ lesson_id }};
-
-const REQUIRED_POSITIONS = 4;  // out of 6
-const REQUIRED_TIERS     = 3;  // out of 5
-
+const REQUIRED_POSITIONS = 4;
+const REQUIRED_TIERS     = 3;
 const seenPositions = new Set();
 const seenTiers     = new Set();
 
@@ -226,29 +216,23 @@ $.post("/record_lesson", { lesson_id: lessonId, action: "visit" });
 
 function checkUnlock() {
   const isPositions = $('.pos-btn').length > 0;
-  const isTiers     = $('.tier-card').length > 0;
+  const isGrid      = $('#range-grid').length > 0;
   let unlocked = false;
 
   if (isPositions) {
     const count     = seenPositions.size;
     const remaining = REQUIRED_POSITIONS - count;
     $('#pos-counter').text(count + ' / 6 seats explored');
-    if (count >= REQUIRED_POSITIONS) {
-      unlocked = true;
-    } else {
-      $('#next-hint').text('Explore ' + remaining + ' more seat' + (remaining > 1 ? 's' : '') + ' to continue');
-    }
+    if (count >= REQUIRED_POSITIONS) { unlocked = true; }
+    else { $('#next-hint').text('Explore ' + remaining + ' more seat' + (remaining > 1 ? 's' : '') + ' to continue'); }
   }
 
-  if (isTiers) {
+  if (isGrid) {
     const count     = seenTiers.size;
     const remaining = REQUIRED_TIERS - count;
     $('#tier-counter').text(count + ' / 5 tiers explored');
-    if (count >= REQUIRED_TIERS) {
-      unlocked = true;
-    } else {
-      $('#next-hint').text('Explore ' + remaining + ' more tier' + (remaining > 1 ? 's' : '') + ' to continue');
-    }
+    if (count >= REQUIRED_TIERS) { unlocked = true; }
+    else { $('#next-hint').text('Explore ' + remaining + ' more tier' + (remaining > 1 ? 's' : '') + ' to continue'); }
   }
 
   if (unlocked) {
@@ -258,6 +242,62 @@ function checkUnlock() {
 }
 
 /* ── Positions ──────────────────────────────────────────────── */
+// Per-position hand lists (parsed from data.json playable_hands text via data attribute)
+// We define explicit hand sets per position matching data.json
+const positionHands = {
+  sb:  ['AA','KK','QQ','JJ','AK'],
+  bb:  ['AA','KK','QQ','JJ','TT','99','88','77','AK','AQ','AJ','AT','A2','A3','A4','A5','A6','A7','A8','A9','KQ','KJ','QJ','JT','T9','98','87','76','65'],
+  utg: ['AA','KK','QQ','JJ','TT','AK','AQ'],
+  mp:  ['AA','KK','QQ','JJ','TT','99','88','AK','AQ','AJ','KQ','JT'],
+  co:  ['AA','KK','QQ','JJ','TT','99','88','77','66','AK','AQ','AJ','AT','KQ','KJ','QJ','JT','T9','98','87','76'],
+  btn: ['AA','KK','QQ','JJ','TT','99','88','77','66','55','44','AK','AQ','AJ','AT','A9','A8','A7','A6','A5','A4','A3','A2','KQ','KJ','KT','QJ','QT','JT','T9','98','87','76','65']
+};
+
+const posGridBuilt = {};
+
+function buildPositionGrid(posId) {
+  if (posGridBuilt[posId]) return;
+  posGridBuilt[posId] = true;
+
+  const grid     = document.getElementById('pos-grid-' + posId);
+  if (!grid) return;
+  const playable = positionHands[posId] || [];
+  const ranks    = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+
+  ranks.forEach((r1, i) => {
+    ranks.forEach((r2, j) => {
+      let hand, canonical;
+      if (i === j)    { hand = r1 + r2;        canonical = r1 + r2; }
+      else if (i < j) { hand = r1 + r2 + 's';  canonical = r1 + r2; }
+      else            { hand = r2 + r1 + 'o';  canonical = r2 + r1; }
+
+      // Check if base hand (without s/o) is in playable list
+      const isPlayable = playable.some(h => {
+        const base = h.replace(/[so]$/, '');
+        return base === canonical || h === hand;
+      });
+
+      const cell = document.createElement('div');
+      cell.textContent   = hand;
+      cell.style.cssText = `
+        background: ${isPlayable ? 'rgba(25,135,84,0.55)' : 'rgba(255,255,255,0.04)'};
+        border: 1px solid ${isPlayable ? 'rgba(25,135,84,0.4)' : 'rgba(255,255,255,0.06)'};
+        border-radius: 3px;
+        font-size: 0.7rem;
+        font-family: monospace;
+        text-align: center;
+        color: ${isPlayable ? '#fff' : '#444'};
+        font-weight: 600;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+      grid.appendChild(cell);
+    });
+  });
+}
+
 $('.pos-btn').on('click', function() {
   const posId = $(this).data('pos-id');
   $('.position-detail-card').hide();
@@ -265,7 +305,7 @@ $('.pos-btn').on('click', function() {
   $('#pos-card-' + posId).fadeIn(150);
   $('.pos-btn').removeClass('active-pos');
   $(this).addClass('active-pos');
-
+  buildPositionGrid(posId);
   if (!seenPositions.has(posId)) {
     seenPositions.add(posId);
     $('#check-' + posId).show();
@@ -280,21 +320,114 @@ function closePositionCard(posId) {
   $('.pos-btn').removeClass('active-pos');
 }
 
-/* ── Hand Tiers ─────────────────────────────────────────────── */
-function toggleTier(tierId) {
-  const detail = $('#tier-' + tierId);
-  const chev   = $('#chev-' + tierId);
-  const isOpen = detail.is(':visible');
-  detail.slideToggle(150);
-  chev.html(isOpen ? '&#x25BE;' : '&#x25B4;');
+/* ── Hand Range Grid ─────────────────────────────────────────── */
+const ranks = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
 
-  if (!isOpen && !seenTiers.has(tierId)) {
-    seenTiers.add(tierId);
-    $('#tiercheck-' + tierId).show();
-    $.post("/record_lesson", { lesson_id: lessonId, action: "view_tier", detail: tierId });
+const tierData = {
+  premium:     { hands: ['AA','KK','QQ','JJ','AKs'],
+                 color: '#b8860b', textColor: '#fff', label: 'Premium',
+                 desc: 'The best starting hands in poker. Raise or re-raise from any position. These hands play well in big pots.',
+                 action: 'Raise / 3-bet from anywhere',
+                 tip: "With AA and KK, you want to build the pot preflop. Don't slowplay — raise big." },
+  strong:      { hands: ['TT','99','AKo','AQs','AJs','KQs'],
+                 color: '#198754', textColor: '#fff', label: 'Strong',
+                 desc: 'Very strong hands that play well from most positions. Open-raise from middle position onwards, and 3-bet vs. loose openers.',
+                 action: 'Raise from MP+, call or 3-bet vs. opens',
+                 tip: 'TT and 99 are strong but vulnerable to overcards on the flop. Position matters a lot with these.' },
+  playable:    { hands: ['88','77','ATs','AQo','KJs','QJs','JTs'],
+                 color: '#0dcaf0', textColor: '#000', label: 'Playable',
+                 desc: 'Solid hands in position. From the cutoff or button, these are opens. From early position, proceed with caution.',
+                 action: 'Open from CO/BTN, consider from MP',
+                 tip: 'Suited hands like ATs and JTs gain value from flush draw potential — they play better than their off-suit equivalents.' },
+  speculative: { hands: ['66','55','44','33','22','A9s','A8s','A7s','A6s','A5s','A4s','A3s','A2s','KTs','QTs','T9s','98s','87s','76s','65s'],
+                 color: '#6c757d', textColor: '#fff', label: 'Speculative',
+                 desc: "These hands need the right conditions: late position, good pot odds, or a cheap flop. Don't over-invest preflop.",
+                 action: 'Open from BTN only, call in position with good odds',
+                 tip: "Small pairs are set-mining hands — you're hoping to flop three-of-a-kind. It won't happen often, so you need a good price." },
+  fold:        { hands: [],
+                 color: 'rgba(255,255,255,0.05)', textColor: '#555', label: 'Fold',
+                 desc: "The majority of hands you're dealt. Folding is profitable. Don't fall in love with cards just because they're yours.",
+                 action: 'Fold from most positions',
+                 tip: 'Beginners play too many hands. The best preflop decision is often folding and waiting for a better spot.' }
+};
+
+function getTier(hand) {
+  for (const [id, tier] of Object.entries(tierData)) {
+    if (id !== 'fold' && tier.hands.includes(hand)) return { id, ...tier };
+  }
+  return { id: 'fold', ...tierData.fold };
+}
+
+function buildGrid() {
+  const grid = document.getElementById('range-grid');
+  if (!grid) return;
+  ranks.forEach((r1, i) => {
+    ranks.forEach((r2, j) => {
+      let hand;
+      if (i === j)    hand = r1 + r2;
+      else if (i < j) hand = r1 + r2 + 's';
+      else            hand = r2 + r1 + 'o';
+
+      const tier = getTier(hand);
+      const cell = document.createElement('div');
+      cell.textContent   = hand;
+      cell.dataset.tier  = tier.id;
+      cell.style.cssText = `
+        background: ${tier.color};
+        border-radius: 3px;
+        font-size: 0.7rem;
+        font-family: monospace;
+        text-align: center;
+        cursor: pointer;
+        color: ${tier.textColor};
+        font-weight: 600;
+        transition: opacity 0.15s, transform 0.1s;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+      cell.addEventListener('mouseenter', () => { cell.style.opacity = '0.75'; cell.style.transform = 'scale(1.15)'; cell.style.position = 'relative'; cell.style.zIndex = '10'; });
+      cell.addEventListener('mouseleave', () => { cell.style.opacity = '1';    cell.style.transform = 'scale(1)';    cell.style.zIndex = ''; });
+      cell.addEventListener('click', () => showDetail(hand, tier));
+      grid.appendChild(cell);
+    });
+  });
+}
+
+function showDetail(hand, tier) {
+  document.getElementById('detail-hand').textContent   = hand;
+  document.getElementById('detail-desc').textContent   = tier.desc;
+  document.getElementById('detail-action').textContent = tier.action;
+  document.getElementById('detail-tip').textContent    = tier.tip;
+
+  const badge = document.getElementById('detail-badge');
+  badge.textContent      = tier.label;
+  badge.style.background = tier.color;
+  badge.style.color      = tier.textColor;
+
+  const panel = document.getElementById('hand-detail');
+  panel.style.display     = 'block';
+  panel.style.borderColor = tier.color;
+
+  const alreadySeen = seenTiers.has(tier.id);
+  document.getElementById('detail-check').style.display = alreadySeen ? 'inline' : 'none';
+
+  if (!alreadySeen) {
+    seenTiers.add(tier.id);
+    document.getElementById('detail-check').style.display = 'inline';
+    $.post("/record_lesson", { lesson_id: lessonId, action: "view_tier", detail: tier.id });
     checkUnlock();
   }
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
+function closeDetail() {
+  document.getElementById('hand-detail').style.display = 'none';
+}
+
+buildGrid();
 
 /* ── Advance ────────────────────────────────────────────────── */
 function advanceLesson(id) {
@@ -308,7 +441,6 @@ function advanceLesson(id) {
   });
 }
 
-// Show initial hint on page load
 checkUnlock();
 </script>
 {% endblock %}
