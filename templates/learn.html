@@ -23,12 +23,13 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- LESSON 1: Table Positions                                     -->
+    <!-- LESSON TYPE: positions                                        -->
     <!-- ============================================================ -->
     {% if lesson.type == 'positions' %}
 
-    <div class="text-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
       <span class="text-secondary small text-uppercase" style="letter-spacing: 0.08em;">Click a seat to learn about it</span>
+      <span id="pos-counter" class="text-secondary small">0 / 6 seats explored</span>
     </div>
 
     <!-- Poker table diagram -->
@@ -57,7 +58,7 @@
                 {% elif pos.id == 'bb'  %}top: 76%; left: 22%;
                 {% elif pos.id == 'sb'  %}top: 42%; left: 6%;
                 {% endif %}">
-        {{ pos.short }}
+        {{ pos.short }} <span class="pos-check" id="check-{{ pos.id }}" style="display:none; color:#75d69c; font-size:0.7rem;">✓</span>
       </button>
       {% endfor %}
     </div>
@@ -101,11 +102,15 @@
     {% endif %}
 
     <!-- ============================================================ -->
-    <!-- LESSON 2: Preflop Hand Strength Tiers                        -->
+    <!-- LESSON TYPE: strength                                         -->
     <!-- ============================================================ -->
     {% if lesson.type == 'strength' %}
 
     <!-- Hand tier cards -->
+    <div class="d-flex justify-content-end mb-2">
+      <span id="tier-counter" class="text-secondary small">0 / 5 tiers explored</span>
+    </div>
+
     {% for tier in lesson.content.tiers %}
     <div class="tier-card mb-3 rounded-3 overflow-hidden"
          style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);">
@@ -129,7 +134,10 @@
             {% endfor %}
           </div>
         </div>
-        <span class="text-secondary tier-chevron" id="chev-{{ tier.id }}" style="font-size: 1rem;">&#x25BE;</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="tier-check" id="tiercheck-{{ tier.id }}" style="display:none; color:#75d69c; font-size:0.85rem;">✓</span>
+          <span class="text-secondary tier-chevron" id="chev-{{ tier.id }}" style="font-size: 1rem;">&#x25BE;</span>
+        </div>
       </div>
 
       <!-- Tier detail — hidden by default -->
@@ -190,21 +198,66 @@
       <div></div>
       {% endif %}
 
-      <button id="next-btn" class="btn btn-success btn-lg px-5 fw-bold" onclick="advanceLesson({{ lesson_id }})">
-        {% if lesson.next_lesson %}Continue &#8594;{% else %}Take the Quiz &#8594;{% endif %}
-      </button>
+      <div class="text-end">
+        <div id="next-hint" class="text-secondary small mb-1"></div>
+        <button id="next-btn" class="btn btn-success btn-lg px-5 fw-bold" onclick="advanceLesson({{ lesson_id }})" disabled
+                style="opacity: 0.45; cursor: not-allowed;">
+          {% if lesson.next_lesson %}Continue &#8594;{% else %}Take the Quiz &#8594;{% endif %}
+        </button>
+      </div>
     </div>
 
   </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
 const lessonId = {{ lesson_id }};
 
-// Record page visit
+const REQUIRED_POSITIONS = 4;  // out of 6
+const REQUIRED_TIERS     = 3;  // out of 5
+
+const seenPositions = new Set();
+const seenTiers     = new Set();
+
 $.post("/record_lesson", { lesson_id: lessonId, action: "visit" });
 
-/* ── Positions (Lesson 1) ───────────────────────────────────── */
+function checkUnlock() {
+  const isPositions = $('.pos-btn').length > 0;
+  const isTiers     = $('.tier-card').length > 0;
+  let unlocked = false;
+
+  if (isPositions) {
+    const count     = seenPositions.size;
+    const remaining = REQUIRED_POSITIONS - count;
+    $('#pos-counter').text(count + ' / 6 seats explored');
+    if (count >= REQUIRED_POSITIONS) {
+      unlocked = true;
+    } else {
+      $('#next-hint').text('Explore ' + remaining + ' more seat' + (remaining > 1 ? 's' : '') + ' to continue');
+    }
+  }
+
+  if (isTiers) {
+    const count     = seenTiers.size;
+    const remaining = REQUIRED_TIERS - count;
+    $('#tier-counter').text(count + ' / 5 tiers explored');
+    if (count >= REQUIRED_TIERS) {
+      unlocked = true;
+    } else {
+      $('#next-hint').text('Explore ' + remaining + ' more tier' + (remaining > 1 ? 's' : '') + ' to continue');
+    }
+  }
+
+  if (unlocked) {
+    $('#next-btn').prop('disabled', false).css({ opacity: 1, cursor: 'pointer' });
+    $('#next-hint').text('');
+  }
+}
+
+/* ── Positions ──────────────────────────────────────────────── */
 $('.pos-btn').on('click', function() {
   const posId = $(this).data('pos-id');
   $('.position-detail-card').hide();
@@ -212,7 +265,13 @@ $('.pos-btn').on('click', function() {
   $('#pos-card-' + posId).fadeIn(150);
   $('.pos-btn').removeClass('active-pos');
   $(this).addClass('active-pos');
-  $.post("/record_lesson", { lesson_id: lessonId, action: "view_position", detail: posId });
+
+  if (!seenPositions.has(posId)) {
+    seenPositions.add(posId);
+    $('#check-' + posId).show();
+    $.post("/record_lesson", { lesson_id: lessonId, action: "view_position", detail: posId });
+    checkUnlock();
+  }
 });
 
 function closePositionCard(posId) {
@@ -221,20 +280,25 @@ function closePositionCard(posId) {
   $('.pos-btn').removeClass('active-pos');
 }
 
-/* ── Hand Tiers (Lesson 2) ──────────────────────────────────── */
+/* ── Hand Tiers ─────────────────────────────────────────────── */
 function toggleTier(tierId) {
   const detail = $('#tier-' + tierId);
   const chev   = $('#chev-' + tierId);
   const isOpen = detail.is(':visible');
   detail.slideToggle(150);
   chev.html(isOpen ? '&#x25BE;' : '&#x25B4;');
-  if (!isOpen) {
+
+  if (!isOpen && !seenTiers.has(tierId)) {
+    seenTiers.add(tierId);
+    $('#tiercheck-' + tierId).show();
     $.post("/record_lesson", { lesson_id: lessonId, action: "view_tier", detail: tierId });
+    checkUnlock();
   }
 }
 
 /* ── Advance ────────────────────────────────────────────────── */
 function advanceLesson(id) {
+  if ($('#next-btn').prop('disabled')) return;
   $.post("/record_lesson", { lesson_id: id, action: "complete" }, function() {
     {% if lesson.next_lesson %}
     window.location.href = "{{ url_for('learn', lesson_id=lesson.next_lesson) }}";
@@ -243,6 +307,8 @@ function advanceLesson(id) {
     {% endif %}
   });
 }
-</script>
 
+// Show initial hint on page load
+checkUnlock();
+</script>
 {% endblock %}
