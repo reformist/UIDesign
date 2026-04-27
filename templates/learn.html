@@ -140,6 +140,9 @@
         </div>
         <button class="btn btn-sm btn-outline-secondary py-0" onclick="closeDetail()">&#x2715;</button>
       </div>
+      <div id="card-visuals" class="d-flex gap-2 my-3"></div>
+      
+      <p id="detail-desc" class="text-secondary mb-2"></p>
       <p id="detail-desc" class="text-secondary mb-2"></p>
       <div class="p-2 px-3 rounded-2 small d-inline-block mb-2" style="background: rgba(255,255,255,0.06);">
         <span class="text-secondary">Action: </span>
@@ -351,6 +354,62 @@ const tierData = {
                  tip: 'Beginners play too many hands. The best preflop decision is often folding and waiting for a better spot.' }
 };
 
+function renderCards(hand) {
+  const container = document.getElementById('card-visuals');
+  container.innerHTML = '';
+
+  // Parse the hand string (e.g., "AKs" -> rank1: "A", rank2: "K", type: "s")
+  let rank1 = hand.charAt(0);
+  let rank2 = hand.charAt(1);
+  let type = hand.length > 2 ? hand.charAt(2) : 'p'; // 's' (suited), 'o' (offsuit), 'p' (pair)
+
+  // Replace 'T' with '10' for a more authentic card look
+  if (rank1 === 'T') rank1 = '10';
+  if (rank2 === 'T') rank2 = '10';
+
+  // Define standard suits
+  const suits = [
+    { symbol: '♠', color: '#212529' }, // Dark text for black suits so it pops on white
+    { symbol: '♥', color: '#dc3545' }, // Bootstrap danger red
+    { symbol: '♦', color: '#dc3545' },
+    { symbol: '♣', color: '#212529' }
+  ];
+
+  let suit1, suit2;
+  
+  // Logic to determine suits based on hand type
+  if (type === 's') {
+    suit1 = suits[0]; // Both Spades for suited hands
+    suit2 = suits[0];
+  } else {
+    suit1 = suits[0]; // Spades for the first card
+    suit2 = suits[1]; // Hearts for the second card (off-suit and pairs)
+  }
+
+  // Template for a CSS playing card
+  const createCardHTML = (rank, suit) => `
+    <div style="
+        width: 65px; height: 90px; background: white; border-radius: 6px;
+        border: 1px solid #dee2e6; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        position: relative; /* Changed to relative to support absolute positioning inside */
+        color: ${suit.color}; font-family: Arial, sans-serif;
+        user-select: none;
+    ">
+        <div style="position: absolute; top: 4px; left: 6px; text-align: center; line-height: 1.1;">
+            <div style="font-size: 1.1rem; font-weight: 800;">${rank}</div>
+            <div style="font-size: 1rem; font-weight: normal;">${suit.symbol}</div>
+        </div>
+        
+        <div style="position: absolute; bottom: 4px; right: 6px; text-align: center; line-height: 1.1; transform: rotate(180deg);">
+            <div style="font-size: 1.1rem; font-weight: 800;">${rank}</div>
+            <div style="font-size: 1rem; font-weight: normal;">${suit.symbol}</div>
+        </div>
+    </div>
+  `;
+
+  // Inject the HTML
+  container.innerHTML = createCardHTML(rank1, suit1) + createCardHTML(rank2, suit2);
+}
 function getTier(hand) {
   for (const [id, tier] of Object.entries(tierData)) {
     if (id !== 'fold' && tier.hands.includes(hand)) return { id, ...tier };
@@ -405,6 +464,8 @@ function showDetail(hand, tier) {
   badge.textContent      = tier.label;
   badge.style.background = tier.color;
   badge.style.color      = tier.textColor;
+
+  renderCards(hand);
 
   const panel = document.getElementById('hand-detail');
   panel.style.display     = 'block';
